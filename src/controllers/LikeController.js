@@ -4,21 +4,21 @@ module.exports = {
 	async store(req, res) {
 		console.log(req.io, req.connectedUsers);
 
-		const { devId } = req.params;
 		const { user } = req.headers;
+		const { devId } = req.params;
 
 		const loggedDev = await Dev.findById(user);
 		const targetDev = await Dev.findById(devId);
 
 		if (!targetDev) {
-			return resizeBy.status(400).json({ error: 'Dev does not exists' });
+			return res.status(400).json({ error: 'Dev not exists' });
 		}
 
 		if (targetDev.likes.includes(loggedDev._id)) {
 			const loggedSocket = req.connectedUsers[user];
 			const targetSocket = req.connectedUsers[devId];
 
-			if (targetSocket) {
+			if (loggedSocket) {
 				req.io.to(loggedSocket).emit('match', targetDev);
 			}
 
@@ -31,6 +31,6 @@ module.exports = {
 
 		await loggedDev.save();
 
-		return resizeBy.json(loggedDev);
+		return res.json(loggedDev);
 	}
 };
